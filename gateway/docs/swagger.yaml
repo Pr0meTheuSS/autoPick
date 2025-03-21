@@ -1,0 +1,632 @@
+basePath: /
+definitions:
+  dtos.AuthCredentialsDto:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  dtos.CreateOrderDto:
+    properties:
+      id:
+        type: string
+      products_ids:
+        items:
+          type: string
+        type: array
+      total:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  dtos.CreateProductDto:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      category:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  dtos.CreateUserDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  dtos.LoginDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dtos.OrderDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      products_ids:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+      total:
+        type: integer
+      user_id:
+        type: string
+    type: object
+  dtos.ProductDto:
+    properties:
+      attributes:
+        additionalProperties: {}
+        type: object
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  dtos.UserDto:
+    properties:
+      confirmed:
+        type: boolean
+      email:
+        type: string
+      id:
+        type: string
+      is_blocked:
+        type: boolean
+      password:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:9090
+info:
+  contact: {}
+  description: gateway API
+  title: Gateway Service API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизует пользователя по email и password. Выдает access и refresh
+        токены.
+      parameters:
+      - description: Данные для авторизации пользователя
+        in: body
+        name: loginCredentials
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.AuthCredentialsDto'
+        "400":
+          description: Неверные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Вход в систему
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет сессионный access токен, инвалидирует старый refresh
+        токен, создает новый.
+      parameters:
+      - description: Данные сессионных токенов
+        in: body
+        name: authCredentials
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AuthCredentialsDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.AuthCredentialsDto'
+        "400":
+          description: Неверные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Обновить сессионный токен
+      tags:
+      - auth
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список заказов с возможностью пагинации
+      parameters:
+      - default: 0
+        description: offset
+        in: query
+        name: offset
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Уникальный идентификатор пользователя, который офрмлял заказы
+        in: query
+        name: user_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.OrderDto'
+            type: array
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Получить список заказов
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый заказ
+      parameters:
+      - description: Данные нового заказа
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateOrderDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.OrderDto'
+        "400":
+          description: Неверные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Создать заказ
+      tags:
+      - orders
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий заказ
+      parameters:
+      - description: Обновленные данные заказа
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.OrderDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.OrderDto'
+        "400":
+          description: Неверные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Обновить заказ
+      tags:
+      - orders
+  /orders/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет заказ по ID
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Заказ удален
+        "400":
+          description: Некорректный ID
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Удалить заказ
+      tags:
+      - orders
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о заказе по его ID
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.OrderDto'
+        "400":
+          description: Некорректный ID
+          schema:
+            type: string
+        "404":
+          description: Заказ не найден
+          schema:
+            type: string
+      summary: Получить заказ по ID
+      tags:
+      - orders
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список продуктов с возможностью пагинации
+      parameters:
+      - default: 0
+        description: offset
+        in: query
+        name: offset
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.ProductDto'
+            type: array
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Получить список продуктов
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Добавляет новый продукт
+      parameters:
+      - description: Данные нового продукта
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateProductDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.ProductDto'
+        "400":
+          description: Неверные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Создать продукт
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий продукт
+      parameters:
+      - description: Обновленные данные продукта
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.ProductDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.ProductDto'
+        "400":
+          description: Неверные данные
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Обновить продукт
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет продукт по ID
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Продукт удален
+        "400":
+          description: Некорректный ID
+          schema:
+            type: string
+        "500":
+          description: Ошибка сервера
+          schema:
+            type: string
+      summary: Удалить продукт
+      tags:
+      - products
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о продукте по его ID
+      parameters:
+      - description: ID продукта
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.ProductDto'
+        "400":
+          description: Некорректный ID
+          schema:
+            type: string
+        "404":
+          description: Продукт не найден
+          schema:
+            type: string
+      summary: Получить продукт по ID
+      tags:
+      - products
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка пользователей с возможностью пагинации по страницам
+        и лимиту.
+      parameters:
+      - default: 0
+        description: offset
+        in: query
+        name: offset
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dtos.UserDto'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Получить список пользователей с пагинацией
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Создание нового пользователя с предоставленными данными. Статус
+        почты - неподтвержденный, роль - пользователь.
+      parameters:
+      - description: User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateUserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.UserDto'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Создать нового пользователя
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Удалить пользователя по ID
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Получение данных пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.UserDto'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Получить пользователя по ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated User Data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateUserDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.UserDto'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+        "500":
+          description: Server error
+          schema:
+            type: string
+      summary: Обновить данные пользователя
+      tags:
+      - users
+swagger: "2.0"

@@ -11,7 +11,7 @@ function App() {
   const fetchParts = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:8000/drom/${searchString}/${model}`);
+      const response = await axios.get(`http://89.104.66.107:8080/drom/${searchString}/${model}/?page=1`);
       setParts(response.data);
     } catch (error) {
       console.error('Error fetching parts:', error);

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "internal/proto";
+
+service ProductService {
+  rpc GetProducts (GetProductsRequest) returns (GetProductsResponse);
+  rpc GetProductByID (GetProductByIDRequest) returns (Product);
+  rpc CreateProduct (Product) returns (Product);
+  rpc UpdateProduct (Product) returns (Product);
+  rpc DeleteProduct (DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  float price = 4;
+}
+
+message GetProductsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message GetProductsResponse {
+  repeated Product products = 1;
+}
+
+message GetProductByIDRequest {
+  string id = 1;
+}
+
+message DeleteProductRequest {
+  string id = 1;
+}
+
+message DeleteProductResponse {
+  bool success = 1;
+}
